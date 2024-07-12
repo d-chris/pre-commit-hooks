@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "pre-commit-hooks"
+version = "0.0.0"
+description = ""
+authors = ["Christoph Dörrer <d-chris@web.de>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.scripts]
+indent = "pre_commit_hooks.indent:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

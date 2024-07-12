@@ -1,0 +1,7 @@
+- id: indent
+  name: Code Indentation
+  description: "Automatically formats C and C++ code files, including headers, using `gnu idnent`."
+  entry: indent
+  language: python
+  files: '\.(c|h|cpp|cc|cxx|hpp|hxx)$'
+  args: ["-bli0", "-nut", "-l100", "--delete-bak"]
