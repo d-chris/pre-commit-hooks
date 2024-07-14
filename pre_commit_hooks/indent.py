@@ -1,9 +1,14 @@
 import argparse
+import logging
 import os
 import subprocess
 import sys
 from pathlib import Path
 from typing import Sequence, Union
+
+from .logger import get_logger
+
+log = get_logger("indent")
 
 
 def indent_version() -> str:
@@ -17,10 +22,12 @@ def indent_version() -> str:
             capture_output=True,
         )
     except FileNotFoundError as e:
+        log.critical("indent not found")
         raise SystemExit(1) from e
     except subprocess.CalledProcessError as e:
         return e.output
 
+    log.error("no version available")
     raise SystemExit(1)
 
 
@@ -41,7 +48,7 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
         "--verbose",
         action="count",
         default=0,
-        help="Verbosity level",
+        help="Verbosity level, repeat for more verbosity.",
     )
     parser.add_argument(
         "--simple-backup-suffix",
@@ -75,8 +82,7 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
 
     env = os.environ.copy()
 
-    if args.simple_backup_suffix:
-        env["SIMPLE_BACKUP_SUFFIX"] = args.simple_backup_suffix
+    env["SIMPLE_BACKUP_SUFFIX"] = args.simple_backup_suffix
 
     if args.version_control == "none":
         env["VERSION_CONTROL"] = "simple"
@@ -87,7 +93,15 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
         env["VERSION_WIDTH"] = str(args.version_width)
 
     if args.verbose > 0:
-        print(f"indent: ", argv + sys.argv[1:])
+        log.setLevel(logging.ERROR)
+
+    if args.verbose > 1:
+        log.setLevel(logging.WARNING)
+
+    if args.verbose > 2:
+        log.setLevel(logging.INFO)
+
+    log.info(sys.argv[1:])
 
     try:
         subprocess.run(
@@ -98,8 +112,10 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
             capture_output=False if args.verbose > 0 else True,
         )
     except FileNotFoundError:
+        log.critical("indent not found")
         return 1
     except subprocess.CalledProcessError as e:
+        log.error(e.stderr)
         return e.returncode
 
     if args.version_control == "none":
@@ -110,6 +126,7 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
                 try:
                     file.unlink()
                 except Exception as e:
+                    log.warning(f"Could not delete {file}: {e}")
                     continue
 
     return 0
