@@ -10,7 +10,7 @@ readme = "README.md"
 python = "^3.9"
 
 [tool.poetry.scripts]
-indent = "pre_commit_hooks.indent:main"
+gnuindent = "pre_commit_hooks.indent:main"
 
 [build-system]
 requires = ["poetry-core"]
